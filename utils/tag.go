@@ -4,7 +4,8 @@ import "reflect"
 
 func GetJsonTagOnField(structTarget interface{}, fieldName string) string {
 	structTargetType := reflect.TypeOf(structTarget)
-	if structTargetType.Kind() != reflect.Ptr {
+
+	if structTargetType.Kind() == reflect.Ptr {
 		structTargetType = structTargetType.Elem()
 	}
 
