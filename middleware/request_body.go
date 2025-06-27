@@ -10,13 +10,14 @@ import (
 func BodyValidator(bodyStruct any) fiber.Handler {
 	return func(c *fiber.Ctx) error {
 		typ := reflect.TypeOf(bodyStruct)
-		if typ.Kind() != reflect.Ptr {
+
+		if typ.Kind() == reflect.Ptr {
 			typ = typ.Elem()
 		}
 
-		body := reflect.New(typ).Interface()
+		requestBody := reflect.New(typ).Interface()
 
-		if err := c.BodyParser(body); err != nil {
+		if err := c.BodyParser(requestBody); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"status":  fiber.StatusBadRequest,
 				"message": "Invalid request body",
@@ -24,7 +25,7 @@ func BodyValidator(bodyStruct any) fiber.Handler {
 			})
 		}
 
-		if err := validator.Validator(body); err != nil {
+		if err := validator.Validator(requestBody); err != nil {
 			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
 				"status":  fiber.StatusBadRequest,
 				"message": "Validation error",
@@ -32,7 +33,7 @@ func BodyValidator(bodyStruct any) fiber.Handler {
 			})
 		}
 
-		c.Locals("body", body)
+		c.Locals("requestBody", requestBody)
 
 		return c.Next()
 	}
