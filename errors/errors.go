@@ -1,16 +1,16 @@
-package error
+package errors
 
 type Error struct {
 	status  int
 	message string
-	errors  any
+	details any
 }
 
-func NewError(status int, message string, errors any) *Error {
+func NewError(status int, message string, details any) *Error {
 	return &Error{
 		status:  status,
 		message: message,
-		errors:  errors,
+		details: details,
 	}
 }
 
@@ -22,6 +22,6 @@ func (e *Error) GetMessage() string {
 	return e.message
 }
 
-func (e *Error) GetErrors() any {
-	return e.errors
+func (e *Error) GetDetails() any {
+	return e.details
 }
