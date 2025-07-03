@@ -36,6 +36,11 @@ func (rf *ResponseFiber[T]) Pagination(totalRows int, page int, size int) *Respo
 	return rf
 }
 
+func (rf *ResponseFiber[T]) Errors(errors *T) *ResponseFiber[T] {
+	rf.response.SetErrors(errors)
+	return rf
+}
+
 func (rf *ResponseFiber[T]) Build() error {
 	return rf.context.Status(rf.response.Status).JSON(rf.response)
 }
