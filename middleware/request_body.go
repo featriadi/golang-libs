@@ -1,40 +1,40 @@
 package middleware
 
 import (
-	"reflect"
+	"context"
+	"encoding/json"
+	"net/http"
 
+	responsebuilder "github.com/featriadi/golang-libs/response_builder"
 	"github.com/featriadi/golang-libs/validator"
-	"github.com/gofiber/fiber/v2"
 )
 
-func BodyValidator(bodyStruct any) fiber.Handler {
-	return func(c *fiber.Ctx) error {
-		typ := reflect.TypeOf(bodyStruct)
+func RequestBodyValidator[T any]() func(next http.Handler) http.Handler {
+	return func(next http.Handler) http.Handler {
+		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+			var requestBody T
 
-		if typ.Kind() == reflect.Ptr {
-			typ = typ.Elem()
-		}
+			if err := json.NewDecoder(r.Body).Decode(requestBody); err != nil {
+				errMsg := err.Error()
+				responsebuilder.NewResponseBuilder[string](&w).
+					Status(http.StatusBadRequest).
+					Message("Invalid request body").
+					Errors(&errMsg).
+					Build()
+				return
+			}
 
-		requestBody := reflect.New(typ).Interface()
+			if err := validator.Validator(requestBody); err != nil {
+				responsebuilder.NewResponseBuilder[map[string]string](&w).
+					Status(http.StatusBadRequest).
+					Message("Validation error").
+					Errors(&err).
+					Build()
+				return
+			}
 
-		if err := c.BodyParser(requestBody); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"status":  fiber.StatusBadRequest,
-				"message": "Invalid request body",
-				"error":   err.Error(),
-			})
-		}
-
-		if err := validator.Validator(requestBody); err != nil {
-			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-				"status":  fiber.StatusBadRequest,
-				"message": "Validation error",
-				"error":   err,
-			})
-		}
-
-		c.Locals("requestBody", requestBody)
-
-		return c.Next()
+			ctx := context.WithValue(r.Context(), requestBodyKey, requestBody)
+			next.ServeHTTP(w, r.WithContext(ctx))
+		})
 	}
 }
