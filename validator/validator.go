@@ -3,6 +3,7 @@ package validator
 import (
 	"fmt"
 
+	"github.com/featriadi/golang-libs/parser"
 	"github.com/featriadi/golang-libs/utils"
 	"github.com/go-playground/validator/v10"
 )
@@ -31,7 +32,7 @@ func dateValidator(fl validator.FieldLevel) bool {
 	}
 
 	dateString := fl.Field().String()
-	time := utils.ParseStringToDate(dateString)
+	time := parser.ParseStringToPointerDate(dateString)
 
 	return time != nil
 }
