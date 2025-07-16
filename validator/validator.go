@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/featriadi/golang-libs/parser"
-	"github.com/featriadi/golang-libs/utils"
+	"github.com/featriadi/golang-libs/structs"
 	"github.com/go-playground/validator/v10"
 )
 
@@ -15,7 +15,7 @@ func Validator(structTarget any) map[string]string {
 	if err := validate.Struct(structTarget); err != nil {
 		errors := make(map[string]string)
 		for _, err := range err.(validator.ValidationErrors) {
-			fieldName := utils.GetJsonTagOnField(structTarget, err.StructField())
+			fieldName := structs.GetJsonTagFromInterface(structTarget, err.StructField())
 
 			errors[fieldName] = fmt.Sprintf("Field %s failed validation on %s condition", fieldName, err.Tag())
 		}
