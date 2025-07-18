@@ -1,4 +1,4 @@
-package structs
+package reflects
 
 import (
 	"reflect"
@@ -16,10 +16,10 @@ func GetJSONTagFromStructField(field reflect.StructField) string {
 	return jsonTagName
 }
 
-func GetJsonTagFromInterface(structType interface{}, fieldName string) string {
-	structTarget := reflect.TypeOf(structType)
+func GetJsonTagFromStructInterface(structInterface interface{}, fieldName string) string {
+	structType := reflect.TypeOf(structInterface)
 
-	field := GetStructFieldFromStructType(structTarget, fieldName)
+	field := GetStructFieldFromStructType(structType, fieldName)
 	if field == nil {
 		return ""
 	}
